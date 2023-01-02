@@ -1,0 +1,46 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="pt_BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>IR Eduardo - Regis Collection</title>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}" />
+    <script src="{% static 'js/text_modal.js' %}"></script>
+  </head>
+
+  <body>
+    <div class="page">
+      <h1>PPGI-UFAM Regis IR - Eduardo</h1>
+      <form>
+        <label for="q">Consulta na base regis</label>
+        <input type="text" id="q" name="q" />
+        <input type="submit" value="Buscar" />
+      </form>
+
+      {% if query_results %}
+      <p>Tempo de busca: {{query_results.took}} ms</p>
+      <p>Total de documentos encontrados: {{query_results.total}}</p>
+      <p>Max Score: {{query_results.max_score}}</p>
+      <ul>
+        {% for doc in query_results.hits %}
+        <li>
+          <p>
+            <em>Documento: {{ doc.source.docid }}</em> - <button id="button{{ forloop.counter }}" onClick="open_text(this)">Abrir</button>
+            <div class="modal" id="doc{{ forloop.counter }}">
+              <div class="doc-content">
+                <span class="close">&times;</span>
+                <p>{{doc.source.text}}</p>
+              </div>
+            </div>
+            Nome do arquivo: {{ doc.source.filename }}<br />
+            <strong>Score: {{doc.score}}</strong>
+          </p>
+        </li>
+        {% endfor %}
+      </ul>
+      {% endif %}
+    </div>
+  </body>
+</html>
