@@ -138,15 +138,15 @@ def generate_regis_rank_eval_obj():
         request = {
             "id": query_num,
             "request": {
-                "query": {"match": {"text": title} },
-                "ratings":[]
-            }
+                "query": {"match": {"text": title} }
+            },
+            "ratings":[]
         }
 
         # For each document in 'qrels.txt' with the specific query_num
         for doc in qrels[query_num]:
             evaluated_doc = {"_index": "regis", "_id":doc['docid'],"rating":doc['rating']}
-            request['request']['ratings'].append(evaluated_doc)
+            request['ratings'].append(evaluated_doc)
         rank_eval_obj['requests'].append(request)
 
     return rank_eval_obj
