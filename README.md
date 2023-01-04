@@ -14,9 +14,9 @@ REGIS is a public repository for the paper **REGIS: A Test Collection for Geosci
 1. A Python script to adapt the REGIS Collection information to ElasticSearch (ES) format; and
 2. Web Search app to query some information in REGIS Collection indexed with Elastic Search.
 
-### Workspace
+## Workspace
 
-#### Environment
+### Environment
 * ElasticSearch 7.17.8 in a Docker Container (for infrastructure);
 * Python 3.8.8 (for script and Django app);
 * Django Python library 4.1.4 (for search app);
@@ -26,7 +26,7 @@ REGIS is a public repository for the paper **REGIS: A Test Collection for Geosci
 
 Resource used to dev: Macbook Pro M1 - 8GB RAM - OS X Ventura 13.0.1.
 
-#### ElasticSearch
+### ElasticSearch
 Docker container from 7.17.8 image (without security policy in ES).
 
 **Pull the image:**
@@ -75,4 +75,4 @@ Docker container from 7.17.8 image (without security policy in ES).
 
 For ingest files on 'regis' index created, the python script below was used.
 
-#### Adapter Script
+### Adapter Script
