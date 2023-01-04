@@ -29,17 +29,22 @@ Resource used to dev: Macbook Pro M1 - 8GB RAM - OS X Ventura 13.0.1.
 #### ElasticSearch
 Docker container from 7.17.8 image (without security policy in ES).
 
-Pull the image: 
-`docker pull docker.elastic.co/elasticsearch/elasticsearch:7.17.8-arm64`
-OBS: arm64 architecture of M1 chip. The conventional uses x86, just remove "-arm64" in the end.
+**Pull the image:**
 
-Create a "elastic" network:
+`docker pull docker.elastic.co/elasticsearch/elasticsearch:7.17.8-arm64`
+
+*OBS: arm64 architecture of M1 chip. The conventional uses x86, just remove "-arm64" in the end.*
+
+**Create a "elastic" network:**
+
 `docker network create elastic`
 
-Create and run a container instance named es01 in ES single-mode on 9200 and 9300 ports:
+**Create and run a container instance named es01 in ES single-mode on 9200 and 9300 ports:**
+
 `docker run --name es01 --net elastic -p 127.0.0.1:9200:9200 -p 127.0.0.1:9300:9300 -e "discovery.type=single-node" docker.elastic.co/elasticsearch/elasticsearch:7.17.8-arm64`
 
-Create the "regis" index in ES with a specific mapping to the regis collection fields (via curl in terminal):
+**Create the "regis" index in ES with a specific mapping to the regis collection fields (via curl in terminal):**
+
 ` curl -X PUT "localhost:9200/regis?pretty" -H 'Content-Type: application/json' -d'
 {
 	"mappings": {
@@ -54,17 +59,17 @@ Create the "regis" index in ES with a specific mapping to the regis collection f
 '
 `
 
-The mapping is:
+*The mapping is:*
  ```
- {
+{
 	"mappings": {
-			"properties":{ 
-				"docid": {"type":"text"},
-				"filename" : {"type":"text"},
-				"filetype" : {"type":"keyword"},
-				"text": {"type":"text"} 
-			}
+		"properties":{ 
+			"docid": {"type":"text"},
+			"filename" : {"type":"text"},
+			"filetype" : {"type":"keyword"},
+			"text": {"type":"text"} 
 		}
+	}
 }
 ```
 
