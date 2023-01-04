@@ -1,0 +1,13 @@
+
+db.sqlite3
+search/__pycache__/__init__.cpython-38.pyc
+search/__pycache__/admin.cpython-38.pyc
+search/__pycache__/apps.cpython-38.pyc
+search/__pycache__/models.cpython-38.pyc
+search/__pycache__/urls.cpython-38.pyc
+search/__pycache__/views.cpython-38.pyc
+search/migrations/__pycache__/__init__.cpython-38.pyc
+search_app/__pycache__/__init__.cpython-38.pyc
+search_app/__pycache__/settings.cpython-38.pyc
+search_app/__pycache__/urls.cpython-38.pyc
+search_app/__pycache__/wsgi.cpython-38.pyc
