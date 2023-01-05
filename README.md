@@ -16,6 +16,7 @@ REGIS is a public repository for the paper **REGIS: A Test Collection for Geosci
 
 ## Workspace
 
+
 ### Environment
 * ElasticSearch 7.17.8 in a Docker Container (for infrastructure);
 * Python 3.8.8 (for script and Django app);
@@ -25,6 +26,8 @@ REGIS is a public repository for the paper **REGIS: A Test Collection for Geosci
 * json Python library (for adapt to ES format)
 
 Resource used to dev: Macbook Pro M1 - 8GB RAM - OS X Ventura 13.0.1.
+
+
 
 ### ElasticSearch
 Docker container from 7.17.8 image (without security policy in ES).
@@ -75,4 +78,17 @@ Docker container from 7.17.8 image (without security policy in ES).
 
 For ingest files on 'regis' index created, the python script below was used.
 
+
+
 ### Adapter Script
+
+The adapter script [`adapt_to_elasticsearch.py`](https://github.com/edualvss/regis_elasticsearch/blob/main/adapt_to_elasticsearch.py) contains:
+
+1. A function to **convert** the Regis XML documents (inside *documents* folder) in a JSON string format compliant with ElasticSearch.
+2. A procedure to **ingest** the Regis documents in ElasticSearch index 'regis' (elasticsearch docker container need to be up).
+3. A procedure to **convert and save** Regis XML documents in a JSON string format compliant with ES in files (a **json** folder will be created).
+4. A function to **create and return a dict** with the regis evaluated queries (file: qrels.txt of Regis Collection). Each evaluated query id (eg. Q1, Q2, Q3,...) become an "object" that have the 'multiple' *docid* and *rating* of the qrels file.
+5. A function to **create and return** an object formatted to use in [ElasticSearch ranking evaluation API](https://www.elastic.co/guide/en/elasticsearch/reference/current/search-rank-eval.html). This function read the 'queries.xml' and 'qrels.txt' files of Regis Collection to create the object.
+6. A terminal-based menu for the user choose: 1. Ingest documents in ElasticSearch; (2) Convert and save the Regis XML documents in JSON files; (3) Create a JSON file with the ES Ranking Evaluation format for all the evaluated queries in Regis Collection.
+
+*OBS: the script must be on the Regis Collection root path (same level as 'queries.xml', 'qrels.txt' and 'documents' folder)*
