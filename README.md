@@ -85,7 +85,7 @@ For ingest files on 'regis' index created, the python script below was used.
 The adapter script [`adapt_to_elasticsearch.py`](https://github.com/edualvss/regis_elasticsearch/blob/main/adapt_to_elasticsearch.py) contains:
 
 1. A function to **convert** the Regis XML documents (inside *documents* folder) in a JSON string format compliant with ElasticSearch.
-2. A procedure to **ingest** the Regis documents in ElasticSearch index 'regis' (elasticsearch docker container need to be up).
+2. A procedure to **ingest** the Regis documents in ElasticSearch index 'regis' (elasticsearch docker container need to be up at 9200 port).
 3. A procedure to **convert and save** Regis XML documents in a JSON string format compliant with ES in files (a **json** folder will be created).
 4. A function to **create and return a dict** with the regis evaluated queries (file: qrels.txt of Regis Collection). Each evaluated query id (eg. Q1, Q2, Q3,...) become an "object" that have the 'multiple' *docid* and *rating* of the qrels file.
 5. A function to **create and return** an object formatted to use in [ElasticSearch ranking evaluation API](https://www.elastic.co/guide/en/elasticsearch/reference/current/search-rank-eval.html). This function read the 'queries.xml' and 'qrels.txt' files of Regis Collection to create the object.
