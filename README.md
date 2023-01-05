@@ -91,4 +91,6 @@ The adapter script [`adapt_to_elasticsearch.py`](https://github.com/edualvss/reg
 5. A function to **create and return** an object formatted to use in [ElasticSearch ranking evaluation API](https://www.elastic.co/guide/en/elasticsearch/reference/current/search-rank-eval.html). This function read the 'queries.xml' and 'qrels.txt' files of Regis Collection to create the object.
 6. A terminal-based menu to the user choose: 1. Ingest documents in ElasticSearch; (2) Convert and save the Regis XML documents in JSON files; (3) Create a JSON file with the ES Ranking Evaluation format for all the evaluated queries in Regis Collection.
 
-*OBS: the script must be on the Regis Collection root path (same level as 'queries.xml', 'qrels.txt' and 'documents' folder)*
+*OBS. 1: the script must be on the Regis Collection root path (same level as 'queries.xml', 'qrels.txt' and 'documents' folder)*
+
+*OBS. 2: the procedure 2 must be run just one time to avoid replicated documents in the regis index and perform a 3.3GB copy, so you need wait few minutes.*
