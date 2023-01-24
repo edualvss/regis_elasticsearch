@@ -1,6 +1,8 @@
 import os
 import xml.etree.ElementTree as xmlET
 import json
+import math
+import csv
 
 from elasticsearch import Elasticsearch
 
@@ -122,8 +124,8 @@ def generate_regis_rank_eval_obj():
         "requests":[],
         "metric": {
             "dcg" : {
-                "k": 20,
-                "normalize": True
+                "k": 20,            # Number of documents retrieved
+                "normalize": True   # True: Use NDCG, False: Use only DCG
             }
         }
     }
@@ -152,8 +154,99 @@ def generate_regis_rank_eval_obj():
     return rank_eval_obj
 
 
+############## Calculate DCG of REGIS Collection
+
+def calculate_dcg(gain, pos):
+    return gain / math.log2(1+pos)  # DCG is accumulated of 'rating_doc[i] / log2(i + 1)'
+
+def calculate_dcg_alternative(gain,pos): # This is the formula used in Elasticsearch
+    return (math.pow(2,gain)-1) / math.log2(1+pos) # DCG is accumulated of '2 ** rating_doc[i] - 1 / log2(i + 1)'
+
+def generate_regis_metrics_on_evaluated_docs(discount_formula):
+    obj = {}
+    qrels = read_qrels_file('qrels.txt')
+
+    for key,value in qrels.items():
+        obj[key] = {'g': [], 'cg': [], 'dcg': []}
+        cg = 0
+        dcg = 0
+        pos = 1
+        for doc in value:
+            gain = doc['rating']
+            cg = cg + gain
+#            dcg = dcg + calculate_dcg(gain,pos)
+#            dcg = dcg + calculate_dcg_alternative(gain,pos)
+            dcg = dcg + discount_formula(gain,pos)
+            obj[key]['g'].append(gain)
+            obj[key]['cg'].append(cg)
+            obj[key]['dcg'].append(dcg)
+            pos += 1
+        obj[key]['n'] = pos - 1
+
+    return obj
+
+def generate_regis_idcg(metrics, top_k, discount_formula):
+    obj = {}
+    for key,value in metrics.items():
+        value['g'].sort(reverse=True)
+        value['idcg'] = []
+        idcg = 0
+        pos = 1
+        for gain in value['g']:
+#            indcg += calculate_dcg(gain,pos)
+#            indcg += calculate_dcg_alternative(gain,pos)
+            idcg += discount_formula(gain,pos)
+            value['idcg'].append(idcg)
+            pos += 1
+            if pos == top_k+1:
+                break
+        obj[key] = {"idcg": idcg, "k": pos-1}
+
+    return obj
+
+
+############################ Elasticsearch Rank Evaluation 
+
+def read_es_rank_eval_result(filename):
+    rank_obj = None
+    with open(filename,'r') as f:
+        rank_obj = json.load(f)
+    return rank_obj
+
+def process_rank_evaluation(rank_obj, metrics, discount_formula):
+#    print(rank_obj['details']['Q1'])
+#    print(metrics)
+
+    with open('rank_eval_detail.csv',mode='w') as rank_file:
+        header = ['QUERY','#','DOCID', 'SCORE', 'G', 'CG','DCG','IDCG','NDCG']
+        writer = csv.DictWriter(rank_file, fieldnames=header)
+        writer.writeheader()
+
+        for query in rank_obj['details']:
+            obj = rank_obj['details'][query]
+            i = 1
+            cg = 0
+            dcg = 0
+            for doc in obj['hits']:
+                idcg = metrics[query]['idcg'][i-1]
+                rating = doc['rating']
+                if rating != None:
+                    cg += rating
+                    dcg += discount_formula(rating,i)
+                ndcg = dcg / idcg
+                writer.writerow({'QUERY':query,'#': i, 'DOCID': doc['hit']['_id'],'SCORE':doc['hit']['_score'],'G': rating, 'CG': cg, 'DCG':dcg, 'IDCG': idcg, 'NDCG': ndcg})
+                i+=1
+
+
 #### Main
-option = int(input("Choose an action:\n1) Ingest REGIS file in Elastic Search (ES)\n2) Convert XML files to JSON\n3) Generate ES JSON for rank evaluation\n"))
+#option = int(input("""
+#Choose an action:
+#\n1) Ingest REGIS collection in Elastic Search (ES)
+#\n2) Convert Regis XML documents to JSON
+#\n3) Generate JSON for Elastic Search rank evaluation
+#\n4) Calculate the CG, DCG, IDCG of REGIS evaluated documents
+#\n"""))
+option = 4
 
 if option == 1:
     ingest = input("Do you want ingest files (s/n)?\nIt will take a long time (copying ~3.3GB)")
@@ -172,5 +265,22 @@ elif option == 3:
     rank_eval = generate_regis_rank_eval_obj()
     with open("rank_eval.json",'w',) as outfile:
         json.dump(rank_eval,outfile,ensure_ascii=False,indent=2)
+elif option == 4:
+    top_k = 10
+#    formula = calculate_dcg
+    formula = calculate_dcg_alternative
+    
+    # From collection
+    metrics = generate_regis_metrics_on_evaluated_docs(formula)
+    idcg = generate_regis_idcg(metrics, top_k, formula)
+#    print(metrics)
+#    print(idcg)
+ 
+    # From Elasticsearch index / rank_eval API result
+    rank_eval_result_file = "rank_eval_all_queries_response-top10.json"
+    rank_obj = read_es_rank_eval_result(rank_eval_result_file)
+#    print(rank_obj)
+    process_rank_evaluation(rank_obj, metrics, formula)
+    
 else:
     print("Invalid option...exiting")
