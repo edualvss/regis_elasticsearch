@@ -239,14 +239,14 @@ def process_rank_evaluation(rank_obj, metrics, discount_formula):
 
 
 #### Main
-#option = int(input("""
-#Choose an action:
-#\n1) Ingest REGIS collection in Elastic Search (ES)
-#\n2) Convert Regis XML documents to JSON
-#\n3) Generate JSON for Elastic Search rank evaluation
-#\n4) Calculate the CG, DCG, IDCG of REGIS evaluated documents
-#\n"""))
-option = 4
+option = int(input("""
+Choose an action:
+\n1) Ingest REGIS collection in Elastic Search (ES)
+\n2) Convert Regis XML documents to JSON
+\n3) Generate JSON for Elastic Search rank evaluation
+\n4) Calculate the CG, DCG, IDCG of REGIS evaluated documents (generates a CSV file)
+\n"""))
+
 
 if option == 1:
     ingest = input("Do you want ingest files (s/n)?\nIt will take a long time (copying ~3.3GB)")
