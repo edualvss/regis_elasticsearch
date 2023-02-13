@@ -124,7 +124,7 @@ def generate_regis_rank_eval_obj():
         "requests":[],
         "metric": {
             "dcg" : {
-                "k": 20,            # Number of documents retrieved
+                "k": 10,            # Number of documents retrieved
                 "normalize": True   # True: Use NDCG, False: Use only DCG
             }
         }
@@ -217,6 +217,7 @@ def process_rank_evaluation(rank_obj, metrics, discount_formula):
 #    print(rank_obj['details']['Q1'])
 #    print(metrics)
 
+    queries_ndcg = []
     with open('rank_eval_detail.csv',mode='w') as rank_file:
         header = ['QUERY','#','DOCID', 'SCORE', 'G', 'CG','DCG','IDCG','NDCG']
         writer = csv.DictWriter(rank_file, fieldnames=header)
@@ -224,6 +225,9 @@ def process_rank_evaluation(rank_obj, metrics, discount_formula):
 
         for query in rank_obj['details']:
             obj = rank_obj['details'][query]
+
+            queries_ndcg.append({query : obj['metric_score']})
+
             i = 1
             cg = 0
             dcg = 0
@@ -236,6 +240,7 @@ def process_rank_evaluation(rank_obj, metrics, discount_formula):
                 ndcg = dcg / idcg
                 writer.writerow({'QUERY':query,'#': i, 'DOCID': doc['hit']['_id'],'SCORE':doc['hit']['_score'],'G': rating, 'CG': cg, 'DCG':dcg, 'IDCG': idcg, 'NDCG': ndcg})
                 i+=1
+    return queries_ndcg
 
 
 #### Main
@@ -255,16 +260,19 @@ if option == 1:
         print('The index name defined to ingest documents is "regis" in ElasticSearch')
         print('Please wait...')
         ingest_files()
+        print("!!!DONE!!!")
     else:
         print("Ingestion aborted")
 elif option == 2:
     print('This script must be in the REGIS collection root path (with "documents" directory in the same level)')
     convert_xml_regis_files_to_json('./documents','./json')
+    print("!!!DONE!!!")
 elif option == 3:
     print('This script must be in the REGIS collection root path (with "queries.xml" and "qrels.txt" in the same level)')
     rank_eval = generate_regis_rank_eval_obj()
     with open("rank_eval.json",'w',) as outfile:
         json.dump(rank_eval,outfile,ensure_ascii=False,indent=2)
+    print("!!!DONE!!!")
 elif option == 4:
     top_k = 10
 #    formula = calculate_dcg
@@ -277,10 +285,12 @@ elif option == 4:
 #    print(idcg)
  
     # From Elasticsearch index / rank_eval API result
-    rank_eval_result_file = "rank_eval_all_queries_response-top10.json"
+#    rank_eval_result_file = "rank_eval_all_queries_response-top10.json"
+    rank_eval_result_file = "new_rank_eval_result.json"
     rank_obj = read_es_rank_eval_result(rank_eval_result_file)
 #    print(rank_obj)
-    process_rank_evaluation(rank_obj, metrics, formula)
-    
+    queries_ndcg = process_rank_evaluation(rank_obj, metrics, formula)
+    print(queries_ndcg)
+    print("!!!DONE!!!")
 else:
     print("Invalid option...exiting")
