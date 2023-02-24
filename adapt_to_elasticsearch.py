@@ -140,10 +140,29 @@ def generate_regis_rank_eval_obj():
         request = {
             "id": query_num,
             "request": {
-                "query": {"match": {"text": title} }
+                "query": {
+                    "match": {
+                        "tags": title,
+                    } 
+                }
             },
             "ratings":[]
         }
+
+####  Multi-query model
+#        request = {
+#            "id": query_num,
+#            "request": {
+#                "query": {
+#                    "multi_match": {
+#                        "query": title,
+#                        "type": "cross_fields",
+#                        "fields": ["text","tags"]
+#                    } 
+#                }
+#            },
+#            "ratings":[]
+#        }
 
         # For each document in 'qrels.txt' with the specific query_num
         for doc in qrels[query_num]:
