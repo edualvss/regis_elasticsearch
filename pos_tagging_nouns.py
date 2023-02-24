@@ -98,19 +98,24 @@ def process_collection(documents_path, skip_tokens, amount_nouns):
             nouns = process_file(text,docid, skip=skip_tokens, length=amount_nouns)
 
         string_tags = ' '.join(nouns)
-#        if len(nouns) > 0:
-#            tags = {"tags": nouns}
-#            tags = {"tags": string_tags}
-#            resp = es.update(index='regis', id=docid, doc=tags)
-#            print(resp['result'])
 
-        doc = {
-            "docid": docid,
-            "tags": string_tags,
-            "text": text
-        }
-        resp = es.index(index='regis',id=docid,document=json.dumps(doc))
-        print(resp['result'])
+        # Update documents in Elasticsearch
+        if len(nouns) > 0:
+            tags = {"tags": nouns}
+            tags = {"tags": string_tags}
+#            print(string_tags)
+            resp = es.update(index='regis', id=docid, doc=tags)
+            print(resp['result'])
+
+        # Index documents in Elasticsearch
+#        doc = {
+#            "docid": docid,
+#            "tags": string_tags,
+#            "text": text
+#        }
+#        resp = es.index(index='regis',id=docid,document=json.dumps(doc))
+#        print(resp['result'])
+
 #        break  # Test with just one file
 
 
@@ -118,4 +123,5 @@ def process_collection(documents_path, skip_tokens, amount_nouns):
 
 nlp = spacy.load('pt_core_news_lg') # Large train model
 #nlp = spacy.load('pt_core_news_sm') # Short train model
-process_collection('./documents', 2000, 100)
+process_collection('./documents', skip_tokens=0, amount_nouns=100) # Without ignore tokens
+#process_collection('./documents', 2000, 100) # Ignoring the first 2.000 tokens
